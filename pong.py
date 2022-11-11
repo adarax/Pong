@@ -11,7 +11,7 @@ import random as r
 pg.init()
 pg.display.set_caption("Pong")
 
-size_x = 1000
+size_x = 9000
 size_y = 700
 screen = pg.display.set_mode((size_x, size_y), pg.RESIZABLE)
 
