@@ -1,3 +1,9 @@
+####### PONG #######
+
+# Author: adarax (Discord: adam(cs guy))
+
+# RIP predict(). You will be missed. 2022-2022
+
 import math
 import pygame as pg
 import random as r
@@ -156,15 +162,15 @@ while run:
         if keys[pg.K_s] and not l_y + paddle_height >= size_y - 0:
             l_y += 5
 
-        # Normal difficulty: tracks ball, doesn't predict
-        # if ball_motion_vector[1] > 0:
-        #     if l_y + paddle_height / 2 < ball_y:
-        #         if not l_y + paddle_height >= size_y:
-        #             l_y += 5
-        # else:
-        #     if l_y + paddle_height / 2 > ball_y:
-        #         if not l_y / 2 <= 0:
-        #             l_y -= 5
+        # Normal difficulty: tracks ball
+        if ball_motion_vector[1] > 0:
+            if l_y + paddle_height / 2 < ball_y:
+                if not l_y + paddle_height >= size_y:
+                    l_y += 5
+        else:
+            if l_y + paddle_height / 2 > ball_y:
+                if not l_y / 2 <= 0:
+                    l_y -= 5
 
         # Bounce off floor
         if ball_y + ball_radius >= size_y - 3:
@@ -218,7 +224,6 @@ while run:
         # TODO
         # Instructions before game starts, graphical selection of difficulty and multiplayer mode
         # Retry button after game over
-        # Difficulty selection and multiplayer mode selection
         # Baymax themed ball and paddles
 
         screen.fill((0, 0, 0))
