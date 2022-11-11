@@ -63,44 +63,6 @@ def draw():
 
 draw()
 
-# Impossible level CPU method: only works for left paddle
-target_y = size_y / 2
-
-def predict():
-    current_vector = ball_motion_vector.copy() # shallow copy, doesn't affect original
-    currentX = ball_x
-    currentY = ball_y
-    wall_hit_x = size_x
-    last_bounce_data = [0, 0]
-
-    while True:
-        while wall_hit_x > l_x:
-            if current_vector[1] > 0:
-                current_vector[1] += ((size_y - currentY) / current_vector[1]) * offset_increase_constant
-            else:
-                current_vector[1] += ((currentY) / current_vector[1]) * offset_increase_constant
-
-            if current_vector[1] > 0:
-                wall_hit_x = (((size_y - currentY) * current_vector[0]) / current_vector[1]) + currentX
-                currentX = wall_hit_x
-                currentY = size_y
-                current_vector[1] = current_vector[1] * -1
-            else:
-                wall_hit_x = (currentY * abs(current_vector[0]) / current_vector[1]) + currentX
-                currentX = wall_hit_x
-                currentY = 0
-                current_vector[1] = abs(current_vector[1])
-
-            if wall_hit_x > 0:
-                last_bounce_data = [wall_hit_x, currentY]
-        break
-            
-    # Figure out where to put paddle (l)
-    global target_y
-    target_y = ((last_bounce_data[0] - l_x) / abs(current_vector[0])) * abs(current_vector[1])
-    target_y = size_y - target_y if last_bounce_data[1] == size_y else target_y
-    target_y = math.floor(target_y - target_y % 5) # prevents shaking since paddle moves by 5px
-
 # Generates return angle of ball
 def randomAngle():
     temp = ball_motion_vector.copy()
@@ -114,8 +76,6 @@ def randomAngle():
 
     ball_motion_vector[0] = temp[0]
     ball_motion_vector[1] = temp[1]
-    
-    # TODO: tighten angles (more straight to make game harder)
 
 # Loop setup
 run = True
@@ -127,16 +87,7 @@ speed = 10
 # Increases ball speed over time by this amount
 offset_increase_constant = 0.001
 
-# Boolean to call predict on first run
-first_predict = True
-
 while run:
-    if ball_motion_vector[0] < 0 and first_predict:
-        predict()
-        first_predict = False
-    else:
-        first_predict = False
-
     pg.time.delay(speed)
     
     for event in pg.event.get():
@@ -215,13 +166,6 @@ while run:
         #         if not l_y / 2 <= 0:
         #             l_y -= 5
 
-        # Impossible difficulty (left paddle only): predicts ball trajectory
-        if ball_motion_vector[0] < 0:
-            if l_y + paddle_height / 2 > target_y and not l_y <= 0:
-                l_y -= 5
-            elif l_y + paddle_height / 2 < target_y and not l_y + paddle_height >= size_y:
-                l_y += 5
-
         # Bounce off floor
         if ball_y + ball_radius >= size_y - 3:
             ball_motion_vector[1] = -ball_y_offset
@@ -239,9 +183,6 @@ while run:
         if ball_x + ball_radius >= size_x - 30:
             if ball_y >= r_y and ball_y <= r_y + paddle_height:
                 randomAngle()
-                
-                # For the max level CPU to work
-                predict()
 
         # If hits either right or left wall
         if ball_x + ball_radius >= size_x or ball_x - ball_radius <= 0:
@@ -277,9 +218,8 @@ while run:
         # TODO
         # Instructions before game starts, graphical selection of difficulty and multiplayer mode
         # Retry button after game over
-
-        # FIXME
-        # Ball should go in random direction (upon contact with paddle) instead of always reflecting perfectly
+        # Difficulty selection and multiplayer mode selection
+        # Baymax themed ball and paddles
 
         screen.fill((0, 0, 0))
         draw()
