@@ -13,13 +13,16 @@ pg.display.set_caption("Pong")
 
 size_x = 1000
 size_y = 700
-screen = pg.display.set_mode((size_x, size_y), pg.FULLSCREEN)
+screen = pg.display.set_mode((size_x, size_y), pg.RESIZABLE)
+
+# Imported images
+ballImg = pg.image.load("baymax_ball.png")
 
 # Ball setup
 ball_radius = 20
 ball_x = size_x / 2
 ball_y = size_y / 2
-ball_x_offset = 3 if r.randint(0, 1) == 1 else -3 # randomize starting direction
+ball_x_offset = 3 if r.randint(0, 1) else -3 # randomize starting direction
 ball_y_offset = 4
 
 ball_motion_vector = [ball_x_offset, ball_y_offset]
@@ -41,7 +44,7 @@ player1_score = 0
 player2_score = 0
 
 # Score goes up to score_to_win
-score_to_win = 10
+score_to_win = 5
 
 # font of scoreboard
 font = pg.font.SysFont(None, 50)
@@ -54,7 +57,10 @@ def draw():
     pg.draw.rect(screen, (255, 0, 0), pg.Rect(l_x, l_y, paddle_width, paddle_height))
 
     # Drawing ball
-    pg.draw.circle(screen, (255, 255, 255), (ball_x, ball_y), ball_radius)
+    global ballImg
+    scalar = 3
+    ballImg = pg.transform.scale(ballImg, (ball_radius * scalar, ball_radius * scalar))
+    screen.blit(ballImg, (ball_x - (ball_radius * scalar/2), ball_y - (ball_radius * scalar/2)))
 
     # Drawing scoreboard
     p1 = font.render(str(player1_score), True, (255, 255, 255))
@@ -77,7 +83,7 @@ def randomAngle():
     min_range = abs(int(temp[1])) * -1
     len_of_temp = math.sqrt(temp[0] ** 2 + temp[1] ** 2)
     
-    temp[1] = r.randint(1, max_range) if temp[1] > 0 else r.randint(min_range, -1)
+    temp[1] = r.randint(2, max_range) if temp[1] > 0 else r.randint(min_range, -2)
     temp[0] = math.sqrt(len_of_temp ** 2 - temp[1] ** 2) if temp[0] < 0 else math.sqrt(len_of_temp ** 2 - temp[1] ** 2) * -1
 
     ball_motion_vector[0] = temp[0]
@@ -90,8 +96,8 @@ is_paused = False
 # Refresh rate: (1000 / speed) = FPS
 speed = 10
 
-# Increases ball speed over time by this amount
-offset_increase_constant = 0.001
+# Increases ball speed over time by this amount (can be seen as difficulty level)
+offset_increase_constant = 0.004
 
 while run:
     pg.time.delay(speed)
@@ -157,20 +163,34 @@ while run:
             r_y += 5
 
         # Controls (human controlled left side)
-        if keys[pg.K_w] and not l_y <= 0:
-            l_y -= 5
-        if keys[pg.K_s] and not l_y + paddle_height >= size_y - 0:
-            l_y += 5
+        # if keys[pg.K_w] and not l_y <= 0:
+        #     l_y -= 5
+        # if keys[pg.K_s] and not l_y + paddle_height >= size_y - 0:
+        #     l_y += 5
 
-        # Normal difficulty: tracks ball
-        if ball_motion_vector[1] > 0:
-            if l_y + paddle_height / 2 < ball_y:
-                if not l_y + paddle_height >= size_y:
-                    l_y += 5
-        else:
-            if l_y + paddle_height / 2 > ball_y:
-                if not l_y / 2 <= 0:
-                    l_y -= 5
+        # Left side controls (CPU)
+        # For increased difficulty, put the code below into a loop
+        for i in range(1000):
+            if ball_motion_vector[1] > 0:
+                if l_y + paddle_height / 2 < ball_y:
+                    if not l_y + paddle_height >= size_y:
+                        l_y += 5
+            else:
+                if l_y + paddle_height / 2 > ball_y:
+                    if not l_y / 2 <= 0:
+                        l_y -= 5
+
+        # Right side controls (CPU)
+        # For increased difficulty, put the code below into a loop
+
+        # if ball_motion_vector[1] > 0:
+        #     if r_y + paddle_height / 2 < ball_y:
+        #         if not r_y + paddle_height >= size_y:
+        #             r_y += 5
+        # else:
+        #     if r_y + paddle_height / 2 > ball_y:
+        #         if not r_y / 2 <= 0:
+        #             r_y -= 5
 
         # Bounce off floor
         if ball_y + ball_radius >= size_y - 3:
@@ -224,7 +244,7 @@ while run:
         # TODO
         # Instructions before game starts, graphical selection of difficulty and multiplayer mode
         # Retry button after game over
-        # Baymax themed ball and paddles
+        # Baymax themed paddles
 
         screen.fill((0, 0, 0))
         draw()
